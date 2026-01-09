@@ -1,21 +1,40 @@
 services:
-  itp-postgres:
+  # Deploy postgreSQL for all microservices
+  pg-itp-micro-db:
     image: postgres:17.5-bullseye
-    container_name: itp-postgres
+    container_name: pg-itp-micro-db
     environment:
       POSTGRES_USER: itpusr
       POSTGRES_PASSWORD: itp@168
     ports:
       - "5168:5432"
     volumes:
-      - ./init_scripts/postgres_init.sql:/docker-entrypoint-initdb.d/postgres_init.sql
-      - itp-postgres-vol:/var/lib/postgresql/data
+      - ./init_scripts/pg_itp_micro_init.sql:/docker-entrypoint-initdb.d/pg_itp_micro_init.sql
+      - pg-itp-micro-vol:/var/lib/postgresql/data
     networks:
       - itp-net
 
-volumes:
-  itp-postgres-vol:
+  # Deploy postgreSQL for identity & access management (OAuth2)
+  pg-itp-iam-db:
+    image: postgres:17.5-bullseye
+    container_name: pg-itp-iam-db
+    environment:
+      POSTGRES_USER: itpusr
+      POSTGRES_PASSWORD: itp@168
+    ports:
+      - "5169:5432"
+    volumes:
+      - ./init_scripts/pg_itp_iam_init.sql:/docker-entrypoint-initdb.d/pg_itp_iam_init.sql
+      - pg-itp-iam-vol:/var/lib/postgresql/data
+    networks:
+      - itp-net
 
+# Create docker volume internally
+volumes:
+  pg-itp-micro-vol:
+  pg-itp-iam-vol:
+
+# Bind external network
 networks:
   itp-net:
     external: true
