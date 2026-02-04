@@ -6,12 +6,28 @@ volumes:
   schema_registry_itp_data:
   debezium_plugins_itp:
   debezium_data_itp:
+  postgres_itp_data:
 
 networks:
   itp-net:
     external: true
 
 services:
+  # Add this BEFORE the debezium-kafka-connect-itp service
+  postgres-itp:
+    image: debezium/postgres:17
+    container_name: postgres-itp
+    ports:
+      - "5170:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: inventory
+    volumes:
+      - postgres_itp_data:/var/lib/postgresql/data
+    networks:
+      - itp-net
+
   # Service for Debezium customized image
   debezium-kafka-connect-itp:
     build: .
@@ -22,6 +38,7 @@ services:
       - kafka-2-itp
       - kafka-3-itp
       - schema-registry-itp
+      - postgres-itp
     ports:
       - "8083:8083"
     environment:
